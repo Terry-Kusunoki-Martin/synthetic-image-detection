@@ -15,8 +15,8 @@ import torch.multiprocessing
 torch.multiprocessing.set_sharing_strategy('file_system')
 import albumentations as A
 import albumentations.pytorch as Ap
-from utils import architectures
-from utils.blazeface import FaceExtractor, BlazeFace
+from aig_utils import architectures
+from aig_utils.blazeface import FaceExtractor, BlazeFace
 from PIL import Image, ImageFile
 import argparse
 ImageFile.LOAD_TRUNCATED_IMAGES = True
@@ -25,7 +25,7 @@ ImageFile.LOAD_TRUNCATED_IMAGES = True
 # --- Class definition --- #
 class RealvsSyntheticDetector:
 
-    def __init__(self, device: str, M: int = 600, select_face_test: bool = False):
+    def __init__(self, device: str, M: int = 600, select_face_test: bool = False, model_path = 'synth_vs_real.pth'):
 
         self.select_face_test = select_face_test
         self.M = M
@@ -37,7 +37,7 @@ class RealvsSyntheticDetector:
         network_class = getattr(architectures, 'EfficientNetB4')
 
         # model path
-        self.model_path = 'synth_vs_real.pth'
+        self.model_path = model_path
         net = network_class(n_classes=2, pretrained=False).eval().to(self.device)
         state_tmp = torch.load(self.model_path, map_location='cpu')
         if 'net' not in state_tmp.keys():
@@ -95,8 +95,8 @@ class RealvsSyntheticDetector:
 
             # Load face detector
             face_detector = BlazeFace()
-            face_detector.load_weights("utils/blazeface/blazeface.pth")
-            face_detector.load_anchors("utils/blazeface/anchors.npy")
+            face_detector.load_weights("aig_utils/blazeface/blazeface.pth")
+            face_detector.load_anchors("aig_utils/blazeface/anchors.npy")
             face_extractor = FaceExtractor(facedet=face_detector)
 
             # Face detector is the same used in https://github.com/polimi-ispl/icpr2020dfdc
